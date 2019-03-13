@@ -1,0 +1,1332 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Digital Guardian MSI Tool</title>
+<script language="vbscript">
+
+'****************************************************************
+'*	Program Name    :   DgMsiTool.hta
+'*	Notes           :   Used to update an MSI with customer specific
+'*                          configuration and packages
+'*      Last updated    :   11/2/2016
+'****************************************************************
+
+const APP_WIDTH = 975
+const APP_HEIGHT = 740
+
+'g_FSO consts
+const ForReading = 1
+const ForWriting = 2
+const ForAppending = 8
+
+'MSI constants
+const MSI_OPEN_DATABASE_MODE_TRANSACT = 1
+const MSI_VIEW_MODIFY_ASSIGN = 3
+const MSI_READ_STREAM_ANSI = 2
+
+'Property constants
+const PROP_VALUE_NONE          = "[NONE]"
+const PROP_VALUE_EMBEDDED      = "[EMBEDDED]"
+
+const PROP_SERVERNAME          = "SERVERNAME"
+const PROP_SERVERPORT          = "SERVERPORT"
+const PROP_UNINSTALLKEY        = "AUK"
+const PROP_UNINSTALLKEYCONFIRM = "AUK2"
+const PROP_INSTALLDIR          = "INSTALLDIR"
+const PROP_CERTIFICATEFILE     = "CERTIFICATEFILE"
+const PROP_CERTIFICATEIDFILE   = "CERTIFICATEIDFILE"
+const PROP_POSTINSTALLFILENAME = "POSTINSTALLFILENAME"
+const PROP_USEHTTPS            = "USEHTTPS"
+
+const PROP_ALT_SERVERNAME      = "ALTSERVERNAME"
+const PROP_ALT_SERVERPORT      = "ALTSERVERPORT"
+const PROP_ALT_USEHTTPS        = "ALTUSEHTTPS"
+
+const PREFIX_INPUT = "input_"
+const PREFIX_EXPORT = "export_"
+
+const ID_MSI_INPUT = "msiinput"
+
+Dim g_FSO
+Dim g_WShell
+
+Dim g_StatusCell
+Dim g_StatusMsg
+Dim g_iStatusIndx 
+Dim g_iTimerID
+
+Set g_FSO = CreateObject("Scripting.FileSystemObject")
+Set g_WShell = CreateObject("WScript.Shell")
+
+dim g_illegalChars : g_illegalChars = "/:*?<>|" & Chr(34)
+
+
+'Class to support data-driven list of side-by-side files
+class SXSFile
+
+    dim previous    'previous value
+    dim current     'current value
+    dim index       'UI table this file belongs to (0 for special)
+    dim onupdate    'whether this file is applied on update (adds asterisk to UI name)
+    dim displayName 'string to display, instead of the key
+    dim validator   'substring to check for during validation
+    
+    public function Init(indexIn, onupdateIn, validatorIn)
+        previous = ""
+        current = ""
+        index = indexIn
+        onupdate = onupdateIn
+        displayName = ""
+        validator = validatorIn
+        set Init = me
+    end function
+
+end class
+
+'Dictionary of side-by-side files
+dim g_SXSData : set g_SXSData = CreateObject("Scripting.Dictionary")
+
+'Required Properties For Unattended Installation
+g_SXSData.Add "certguid.dat",               (new SXSFile).Init(1, false, "certguid*.dat")
+g_SXSData.Add "dgserver.cer",               (new SXSFile).Init(1, false, "*.cer")
+
+'Optional Properties
+g_SXSData.Add "config.xml",                 (new SXSFile).Init(2, false, "*.xml")
+g_SXSData.Add "dirctrl.dat",                (new SXSFile).Init(2, false, "dirctrl*.dat")
+g_SXSData.Add "impflt.bin",                 (new SXSFile).Init(2, false, "impflt*.bin")
+g_SXSData.Add "impflt.xml",                 (new SXSFile).Init(2, false, "impflt*.xml")
+g_SXSData.Add "prcsflgs.dat",               (new SXSFile).Init(2, false, "prcsflgs*.dat")
+g_SXSData.Add "block.txt",                  (new SXSFile).Init(2, false, "*.txt")
+g_SXSData.Add "block.bmp",                  (new SXSFile).Init(2, false, "*.bmp")
+g_SXSData.Add "agentresources.resx",        (new SXSFile).Init(2, false, "agentresources*.resx")
+g_SXSData.Add "subclassexclusionlist.ini",  (new SXSFile).Init(2, true,  "subclassexclusionlist*.ini")
+g_SXSData.Add "dc_config.xml",              (new SXSFile).Init(2, true, "dc_config*.xml")
+g_SXSData.Add "amecfg.xml",                 (new SXSFile).Init(2, true, "amecfg*.xml")
+g_SXSData.Add "appconfigs.zip",             (new SXSFile).Init(2, true, "appconfigs*.zip")
+
+'Feature Packages
+g_SXSData.Add "dgci_autonomy_x86_64.zip",   (new SXSFile).Init(3, true, "dgci_autonomy_x86_64.zip")
+g_SXSData.Add "dgkv_autonomy_x86_64.zip",   (new SXSFile).Init(3, true, "dgkv_autonomy_x86_64.zip")
+g_SXSData.Add "invmod_upgrade.zip",         (new SXSFile).Init(3, true, "invmod_upgrade*.zip")
+g_SXSData.Add "dg-apt_x86.zip",             (new SXSFile).Init(3, true, "dg-apt_x86.zip")
+g_SXSData.Add "dguc_classifierapi.zip",     (new SXSFile).Init(3, true, "dguc_classifierapi.zip")
+g_SXSData.Add "dguci_classifierapi.zip",    (new SXSFile).Init(3, true, "dguci_classifierapi.zip")
+g_SXSData.Add "dgwip_config.zip",           (new SXSFile).Init(3, true, "dgwip_config.zip")
+g_SXSData.Add "dgwip_proxyscripts.zip",     (new SXSFile).Init(3, true, "dgwip_proxyscripts.zip")
+    
+'Other fields, handled as special cases in the UI
+g_SXSData.Add PROP_SERVERNAME,              (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_UNINSTALLKEY,            (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_UNINSTALLKEYCONFIRM,     (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_INSTALLDIR,              (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_SERVERPORT,              (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_USEHTTPS,                (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_POSTINSTALLFILENAME,     (new SXSFile).Init(0, true, "*.exe")
+g_SXSData.Add PROP_ALT_SERVERNAME,          (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_ALT_SERVERPORT,          (new SXSFile).Init(0, false, "")
+g_SXSData.Add PROP_ALT_USEHTTPS,            (new SXSFile).Init(0, false, "")
+    
+    
+'Special cases
+g_SXSData.Item(PROP_POSTINSTALLFILENAME).displayName = "Post Install Executable"
+
+
+'Dictionary of agent.ini settings, mapped to UI identifiers
+dim g_agentIni : set g_agentIni = CreateObject("Scripting.Dictionary")
+
+g_agentIni.Add PROP_SERVERNAME,             PROP_SERVERNAME
+g_agentIni.Add PROP_SERVERPORT,             PROP_SERVERPORT
+g_agentIni.Add PROP_UNINSTALLKEY,           PROP_UNINSTALLKEY
+g_agentIni.Add PROP_INSTALLDIR,             PROP_INSTALLDIR
+g_agentIni.Add PROP_CERTIFICATEFILE,        "dgserver.cer"
+g_agentIni.Add PROP_CERTIFICATEIDFILE,      "certguid.dat"
+g_agentIni.Add PROP_USEHTTPS,               PROP_USEHTTPS
+g_agentIni.Add PROP_POSTINSTALLFILENAME,    PROP_POSTINSTALLFILENAME
+g_agentIni.Add PROP_ALT_SERVERNAME,         PROP_ALT_SERVERNAME
+g_agentIni.Add PROP_ALT_SERVERPORT,         PROP_ALT_SERVERPORT
+g_agentIni.Add PROP_ALT_USEHTTPS,           PROP_ALT_USEHTTPS
+
+function pi_appload()
+	window.resizeTo APP_WIDTH, APP_HEIGHT
+
+    pi_resetAll
+
+	set g_StatusCell = document.getElementById("statuscell")	
+	g_StatusMsg = ""
+end function
+
+
+function pi_appclose()
+end function
+
+
+function pi_resetData()
+    document.getElementById("form_data").Reset()
+    for each x in g_SXSData.Keys()
+        dim item : set item = g_SXSData.Item(x)
+        'Special case for PROP_POSTINSTALLFILENAME, since it uses a file input
+        if item.index <> 0 or x = PROP_POSTINSTALLFILENAME then
+            item.previous = PROP_VALUE_NONE
+            pi_set x, PROP_VALUE_NONE
+        else
+            item.previous = ""
+            pi_set x, ""
+        end if
+      next
+
+      ' by default this is not checked
+      ' Loop through the checkbox items and set based off of config				      
+      checkBoxProperties = Array(PROP_USEHTTPS, PROP_ALT_USEHTTPS)
+      for each x in checkBoxProperties
+         set item = g_SXSData.Item(x)
+         if item.current <> "" then
+             document.getElementById(x).Checked = 0
+         end if
+      next
+
+end function
+
+
+function pi_resetMsi()
+    document.getElementById("form_msi").Reset()
+end function
+
+
+function pi_resetAll()
+    pi_resetMsi
+    pi_resetData
+end function
+
+
+'Update dictionary, after corresponding UI element has changed
+function pi_changed(szKey)
+    dim element : set element = document.getElementById(szKey)
+    dim item : set item = g_SXSData.Item(szKey)
+
+    item.current = element.value
+    
+    if item.previous <> item.current then
+        element.style.color = "Blue"
+    else
+        element.style.color = "Black"
+    end if
+
+    set element = document.getElementById(PREFIX_EXPORT & szKey)
+    if not element is nothing then
+        if item.current = PROP_VALUE_EMBEDDED then
+            element.style.visibility = "visible"
+        elseif szKey = PROP_POSTINSTALLFILENAME and item.current = item.previous and item.current <> PROP_VALUE_NONE then
+            'Special case!
+            element.style.visibility = "visible"
+        else
+            element.style.visibility = "hidden"
+        end if
+    end if
+end function
+
+
+'Update UI and dictionary, with szValue
+function pi_set(szKey, szValue)
+    dim element : set element = document.getElementById(szKey)
+
+    element.value = szValue
+
+    pi_changed szKey
+end function
+
+
+'Update UI and dictionary, after src element has changed
+function pi_srcChanged(szKey, szSrc)
+    dim src : set src = document.getElementById(szSrc)
+
+    pi_set szKey, src.value
+end function
+
+
+'Export current binary value to disk
+function pi_export(szKey)
+    dim item : set item = g_SXSData.Item(szKey)
+
+    dim label
+    if item.displayName <> "" then 
+        label = item.displayName
+    else
+        label = szKey
+    end if
+    dim dialogTitle : dialogTitle = "Export " & label
+
+    dim newFileName : newFileName = InputBox("Please enter the export file name", dialogTitle)
+    if newFileName = "" then
+        exit function
+    end if
+
+    'Normalize the entered file name, relative to the folder of the current MSI
+    dim msiFileName : msiFileName = document.getElementById(ID_MSI_INPUT).value
+    g_WShell.CurrentDirectory = g_FSO.GetParentFolderName(msiFileName)
+    newFileName = g_FSO.GetAbsolutePathName(newFileName)
+
+    if g_FSO.FileExists(newFileName) then
+        if vbYes <> MsgBox("Target file already exists:" & chr(13) & newFileName & chr(13) & chr(13) & "Overwrite?", vbExclamation + vbYesNo, dialogTitle) then
+            exit function
+        end if
+    else
+        if vbYes <> MsgBox("Export embedded " & label & " as " & chr(13) & newFileName & "?", vbQuestion + vbYesNo, dialogTitle) then
+            exit function
+        end if
+    end if
+
+    dim msiInstaller : set msiInstaller = CreateObject("WindowsInstaller.Installer")
+
+    on error resume next
+    dim msi : set msi = msiInstaller.OpenDatabase(msiFileName, MSI_OPEN_DATABASE_MODE_TRANSACT)
+    if Err.number <> 0 then
+		MsgBox "WindowsInstaller.Installer.OpenDatabase " & msiFileName & " failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, dialogTitle
+        exit function
+    end if
+    on error goto 0
+
+    'Special case is required to handle PROP_POSTINSTALLFILENAME redirection
+    if szKey = PROP_POSTINSTALLFILENAME then
+        szKey = item.current
+    end if    
+
+    dim sql : sql = "SELECT `Data` FROM `Binary` WHERE `Name` = '" & szKey & "'"
+    
+    dim view : set view = msi.OpenView(sql)
+    view.Execute
+    
+    dim record : set record = view.Fetch
+    if not record is nothing then
+        on error resume next
+        dim file : set file = g_FSO.OpenTextFile(newFileName, ForWriting, true, TristateFalse)
+        if Err.number <> 0 then
+		    MsgBox "OpenTextFile " & newFileName & " failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, dialogTitle
+            exit function
+        end if
+        on error goto 0
+
+        ' Loop through writting blocks of data, as readStream does MAX out what it can read
+        Dim sizeStream : sizeStream = record.DataSize(1)
+        Dim totalSize : totalSize = 0
+        Dim data		    
+        Do
+	    data = record.ReadStream(1, 100000, MSI_READ_STREAM_ANSI)
+	    totalSize = totalSize + Len(data)
+	    file.Write data
+            ' free memory
+	    set data = Nothing		    
+	    if totalSize >= sizeStream Then Exit Do
+          		    
+        Loop
+        file.Close
+        MsgBox "Wrote " & FormatNumber(record.DataSize(1), 0) & " bytes to" & chr(13) & newFileName, vbInformation, dialogTitle
+    else
+        MsgBox "Binary " & szKey & " not found!", vbExclamation, dialogTitle
+    end if
+
+    view.Close
+
+    set record = nothing
+    set view   = nothing		    
+end function
+
+
+' test the value of the checkbox to determine if HTTPS is needed for both primary and alternate
+sub testHttpsCheckbox(szKey)
+  dim item : set item = g_SXSData.Item(szKey)
+
+  dim value : set value = document.getElementById(szKey)
+  If value.Checked Then
+    item.current = "1"
+  else
+    item.current = "0"
+  end if
+end sub
+
+
+'Always ensure that the hidden file input is blank, so we can reload the same file again if desired
+function pi_msiChanged(szText, szSrc)
+    dim value : value = document.getElementById(szSrc).value
+    pi_resetMsi
+
+    document.getElementById(szText).value = value
+    pi_loadmsi value, 1
+end function
+
+function SaveAs(p_OrigMsiName, p_newName)
+
+    dim szMSI, folder, tmpDirName
+    szMSI = p_OrigMsiName
+
+    tmpDirName = g_FSO.GetTempName()
+    folder = g_FSO.CreateFolder(tmpDirName)
+
+    Set installer = CreateObject("WindowsInstaller.Installer")
+    dim newDbName
+    newDbName = p_newName
+
+    Dim database : Set database = installer.OpenDatabase(szMSI, MSI_OPEN_DATABASE_MODE_TRANSACT)
+    if Err.number <> 0 then
+	MsgBox "WindowsInstaller.Installer.OpenDatabase " & szMSI & " failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, dialogTitle
+        exit function
+    end if
+
+    Dim newdatabase : Set newdatabase = installer.OpenDatabase(newDbName, 3)
+    if Err.number <> 0 then
+	MsgBox "WindowsInstaller.Installer.OpenDatabase " & newDbName & " failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, dialogTitle
+        exit function
+    end if
+
+    ' Walk all tables in the MSI.. Then export them from MSI and import to another
+    ' This is the only way to cause the MSI file size to shrink if files
+    ' are removed from the MSI (binary tables for instance)
+    Dim table2, view2, record2
+    Set view2 = database.OpenView("SELECT `Name` FROM _Tables")
+    view2.Execute
+
+    Do
+       Set record2 = view2.Fetch
+       If record2 Is Nothing Then Exit Do
+       table2 = record2.StringData(1)
+       CopyTableFromMsi database, newdatabase, table2, folder
+
+    Loop
+
+    set view2 = Nothing
+    table2 = "_SummaryInformation" 'not an actual table'
+    CopyTableFromMsi database, newdatabase, table2, folder
+
+    database.commit
+    newdatabase.Commit
+    
+    set newdatabase  = nothing
+    g_FSO.DeleteFolder(tmpDirName)
+
+end function
+
+
+'
+' export a table from one MSI and import into another MSI
+'
+function CopyTableFromMsi(p_database, p_newdatabase, p_table, p_folder)
+    Dim file :file = p_table & ".xls"
+    p_database.Export p_table, p_folder, file
+    p_newdatabase.Import p_folder, file
+    p_newdatabase.commit
+end function
+
+function pi_writeTableRow(szKey)
+    dim item : set item = g_SXSData.Item(szKey)
+
+    dim szLabel
+    if item.displayName <> "" then 
+        szLabel = item.displayName
+    else
+        szLabel = szKey
+    end if
+
+    if item.onupdate then 
+        szLabel = "* " & szLabel
+    end if
+
+    'The complication here stems from the fact that file inputs cannot be set programmatically, yet we want to
+    'initialize our UI fields from a loaded MSI file.  The workaround is to hide the file input, and create a
+    'visible button and read-only text input to simulate it.  The button sends its click to the hidden input, to
+    'create the browse window.  Once the file is chosen, an onchange event causes the visible text to be updated.
+    document.write("<tr>")
+    document.write("<td class='inputListLabel'>" & szLabel & " : </td>")
+    document.write("<td class='inputListInput'>")
+    document.write("<input type='file' class='inputListHidden' id='" & PREFIX_INPUT & szKey & "' onchange='pi_srcChanged &#39" & szKey & "&#39,&#39" & PREFIX_INPUT & szKey & "&#39'>")
+    document.write("<input type='text' class='inputListText' readonly='readonly' id='" & szKey & "' size='118'>")
+    document.write("<input type='button' class='inputListButton' value='...' onclick='document.GetElementById(&#39" & PREFIX_INPUT & szKey & "&#39).Click()'>")
+    document.write("<input type='button' class='inputListButton' value='X' onclick='pi_set &#39" & szKey & "&#39,&#39" & PROP_VALUE_NONE & "&#39'>")
+    document.write("<input type='button' class='inputListButtonExport' id='" & PREFIX_EXPORT & szKey & "' value='Export' onclick='pi_export &#39" & szKey & "&#39'>")
+    document.write("</td></tr>")
+end function
+
+
+'Special case, with different scripts to handle the MSI form: pi_msiChanged, pi_resetAll
+function pi_writeTableRowMsi()
+    dim szLabel : szLabel = "MSI"
+    dim szKey : szKey = ID_MSI_INPUT
+
+    document.write("<tr>")
+    document.write("<td class='inputListLabel'>" & szLabel & " : </td>")
+    document.write("<td class='inputListInput'>")
+    document.write("<input type='file' class='inputListHidden' id='" & PREFIX_INPUT & szKey & "' onchange='pi_msiChanged &#39" & szKey & "&#39,&#39" & PREFIX_INPUT & szKey & "&#39'>")
+    document.write("<input type='text' class='inputListText' readonly='readonly' id='" & szKey & "' size='118'>")
+    document.write("<input type='button' class='inputListButton' value='...' onclick='document.GetElementById(&#39" & PREFIX_INPUT & szKey & "&#39).Click()'>")
+    document.write("<input type='button' class='inputListButton' value='X' onclick='pi_resetAll'>")
+    document.write("</td></tr>")
+end function
+
+
+function pi_writeTable(index)
+    dim szKey
+    for each szKey in g_SXSData.Keys
+        if g_SXSData.Item(szKey).index = index then
+            pi_writeTableRow szKey
+        end if
+    next
+end function
+
+
+function pi_SetFilesFromFolder(szFolder)
+    dim x
+    for each x in g_SXSData.Keys()
+        dim szFilePath
+        szFilePath = szFolder & "\" & x
+        if g_FSO.FileExists(szFilePath) then
+            pi_set x, szFilePath
+	    end if
+    next
+end function
+
+
+function pi_detectSXSFiles(szFolder)
+    'AGENT.INI takes precedence over autodetected files, so autodetect first
+    pi_SetFilesFromFolder szFolder
+
+    'Read values from agent.ini, if it exists
+    on error resume next
+    dim file : set file = g_FSO.OpenTextFile(szFolder & "\agent.ini", ForReading)
+    if Err.Number = 0 then
+        do while not file.AtEndOfStream
+            dim nextLine : nextLine = file.ReadLine
+            if nextLine <> "" then
+                dim prop
+                for each prop in g_agentIni.Keys()
+                    if InStr(1, nextLine, prop, vbTextCompare) <> 0 then
+                        dim value : value = Mid(nextLine, 1 + InStr(1, nextLine, "="))
+                        if value <> "" then
+                            'Dictionary maps agent.ini strings to UI element names
+                            pi_set g_agentIni.Item(prop), value
+                            if prop = PROP_UNINSTALLKEY then
+                                pi_set PROP_UNINSTALLKEYCONFIRM, value
+                            end if
+                        end if
+                    end if
+                next
+            end if
+        loop
+	end if
+    on error goto 0
+
+    'MSI contents and AGENT.INI both take precedence over autodetected server name, so only overlay when empty
+    if g_SXSData.Item(PROP_SERVERNAME).current = "" then
+        on error resume next
+	    dim szDomain : szDomain = g_WShell.RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\NV Domain")
+        if Err.number = 0 then
+	        dim szHost : szHost = g_WShell.RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\NV Hostname")
+            if Err.number = 0 then
+                pi_set PROP_SERVERNAME, szHost & "." & szDomain
+            end if
+        end if
+        on error goto 0
+    end if
+end function
+
+
+'Populate all fields from the MSI file; reset all fields on failure
+function pi_loadmsi(szFileName, querySideBySide)
+    dim msiInstaller : set msiInstaller = CreateObject("WindowsInstaller.Installer")
+    dim title : title = "Loading MSI..."
+
+    if StrComp(Right(szFileName, 4), ".msi", vbTextCompare) <> 0 then
+        pi_resetAll
+        MsgBox "Not an MSI file!" & chr(13) & chr(13) & szFileName, vbExclamation, title
+        exit function
+    end if
+
+    'Clear any old UI settings
+    pi_resetData
+
+    on error resume next
+    dim msi : set msi = msiInstaller.OpenDatabase(szFileName, MSI_OPEN_DATABASE_MODE_TRANSACT)
+    if Err.number <> 0 then
+		MsgBox "WindowsInstaller.Installer.OpenDatabase " & szFileName & " failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, title
+        pi_resetMsi
+        exit function
+    end if
+    on error goto 0
+
+    dim x, item, sql, view, record
+    for each x in g_SXSData.Keys()
+        set item = g_SXSData.Item(x)
+        if item.index <> 0 then
+            sql = "SELECT `Data` FROM `Binary` WHERE `Name` = '" & x & "'"
+            set view = msi.OpenView(sql)
+            view.Execute
+
+            set record = view.Fetch
+            if not record is nothing then
+                item.previous = PROP_VALUE_EMBEDDED
+                pi_set x, PROP_VALUE_EMBEDDED
+            end if
+        end if
+    next
+
+    dim properties
+    properties = Array(PROP_SERVERNAME, PROP_SERVERPORT, PROP_INSTALLDIR, PROP_UNINSTALLKEY, PROP_USEHTTPS, PROP_POSTINSTALLFILENAME, PROP_ALT_SERVERNAME, PROP_ALT_SERVERPORT, PROP_ALT_USEHTTPS)
+    for each x in properties
+        set item = g_SXSData.Item(x)
+        sql = "SELECT `Value` FROM `Property` WHERE `Property` = '" & x & "'"
+        set view = msi.OpenView(sql)
+        view.Execute
+
+        set record = view.Fetch
+        if not record is nothing then
+            item.previous = record.StringData(1)
+            pi_set x, record.StringData(1)
+        end if
+    next
+
+    ' Loop through the checkbox items and set based off of config				      
+    checkBoxProperties = Array(PROP_USEHTTPS, PROP_ALT_USEHTTPS)
+    for each x in checkBoxProperties
+        set item = g_SXSData.Item(x)
+        if item.current <> "" then
+            document.getElementById(x).Checked = 1
+        end if
+    next
+					
+    
+    set item = g_SXSData.Item(PROP_UNINSTALLKEY)
+    if item.current <> "" then
+        g_SXSData.Item(PROP_UNINSTALLKEYCONFIRM).previous = item.current
+        pi_set PROP_UNINSTALLKEYCONFIRM, item.current
+    end if
+
+    'Overlay SXS files now 
+    if querySideBySide then
+        dim result
+        result = MsgBox("Autodetect side-by-side files with " & szFileName & "?" & chr(13) & chr(13) & "Choose NO to load MSI contents only.", vbQuestion + vbYesNo, title)
+
+        if result = vbYes then
+            pi_detectSXSFiles g_FSO.GetParentFolderName(szFileName)
+        end if
+    end if
+end function
+
+
+'Save and SaveAs are both handled here
+function pi_save(szFileName, bSaveAs)
+    dim dialogTitle
+    if bSaveAs then
+        dialogTitle = "Save As"
+    else
+        dialogTitle = "Save"
+    end if
+
+    if szFileName = "" then
+        MsgBox "Load an MSI first!", vbExclamation, dialogTitle
+        exit function
+    end if
+
+    if not pi_validateFields(dialogTitle) then
+        exit function
+    end if
+
+    'Handle SaveAs
+    if bSaveAs then
+        dim newFileName : newFileName = InputBox("Please enter the new file name", dialogTitle)
+        if newFileName = "" then
+            exit function
+        end if
+
+        if Right(newFileName, 4) <> ".msi" then
+            newFileName = newFileName & ".msi"
+        end if
+
+        'Normalize the entered file name, relative to the folder of the current MSI
+        g_WShell.CurrentDirectory = g_FSO.GetParentFolderName(szFileName)
+        newFileName = g_FSO.GetAbsolutePathName(newFileName)
+
+         g_destFolder = g_FSO.GetParentFolderName(newFileName)
+        if StrComp(szFileName, newFileName, vbTextCompare) = 0 then
+            MsgBox "Target file is already open:" & chr(13) & newFileName & chr(13) & chr(13) & "Use Save instead.", vbExclamation, dialogTitle
+            exit function
+        end if
+
+        if g_FSO.FileExists(newFileName) then
+            if vbYes <> MsgBox("Target file already exists:" & chr(13) & newFileName & chr(13) & chr(13) & "Overwrite?", vbExclamation + vbYesNo, dialogTitle) then
+                exit function
+            end if
+        else
+            if vbYes <> MsgBox("Save changes to:" & chr(13) & szFileName & chr(13) & "as " & chr(13) & newFileName & "?", vbQuestion + vbYesNo, dialogTitle) then
+                exit function
+            end if
+        end if            
+
+        on error resume next
+
+      g_FSO.CopyFile szFileName, newFileName, true
+        if Err.number <> 0 then
+		    MsgBox "CopyFile" & chr(13) & szFileName & chr(13) & "to" & chr(13) & newFileName & chr(13) & "failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, dialogTitle
+            exit function
+        end if
+        on error goto 0
+
+        szFileName = newFileName
+    else
+        ' this is needed to be set when we create the tmp directory
+        g_WShell.CurrentDirectory = g_FSO.GetParentFolderName(szFileName)
+    end if
+
+    'Update any fields where current != previous
+    dim msiInstaller : set msiInstaller = CreateObject("WindowsInstaller.Installer")
+
+    on error resume next
+    dim msi : set msi = msiInstaller.OpenDatabase(szFileName, MSI_OPEN_DATABASE_MODE_TRANSACT)
+    if Err.number <> 0 then
+		MsgBox "WindowsInstaller.Installer.OpenDatabase " & szFileName & " failed, error 0x" & Hex(Err.number) & ": " & Err.Description, vbCritical, dialogTitle
+        if bSaveAs then
+            set msi = nothing
+            g_FSO.DeleteFile(szFilename)
+        end if
+        exit function
+    end if
+    on error goto 0
+
+    dim x, item
+
+    'Update binary table
+    for each x in g_SXSData.Keys()
+        set item = g_SXSData.Item(x)
+        if item.index <> 0 and item.previous <> item.current then
+            pi_updateTableValue msiInstaller, msi, 0, x, item.current
+        end if
+    next
+
+    'Update property table
+    dim properties : properties = Array(PROP_SERVERNAME, PROP_SERVERPORT, PROP_INSTALLDIR, PROP_USEHTTPS, PROP_UNINSTALLKEY, PROP_ALT_SERVERNAME, PROP_ALT_SERVERPORT, PROP_ALT_USEHTTPS)
+    for each x in properties
+        set item = g_SXSData.Item(x)
+        if item.previous <> item.current then
+            pi_updateTablevalue msiInstaller, msi, 1, x, item.current
+        end if
+    next
+
+    'Special case
+    set item = g_SXSData.Item(PROP_POSTINSTALLFILENAME)
+    if item.previous <> item.current then
+        pi_updateTableValue msiInstaller, msi, 0, item.previous, PROP_VALUE_NONE
+        pi_updateTableValue msiInstaller, msi, 0, g_FSO.GetFileName(item.current), item.current
+        pi_updateTablevalue msiInstaller, msi, 1, PROP_POSTINSTALLFILENAME, g_FSO.GetFileName(item.current)
+    end if
+
+    'Commit!
+    msi.Commit
+    set msi = nothing
+
+    ' We always perform a call to saveAs function to ensure the
+    ' MSI file size is adjusted. If that is not done then the MSI file size will only
+    ' grow in size no matter the change.
+    '
+    ' First  :  make change to the MSI which customer provided via "save" or "saveAs". 
+    ' Second : perform a call to 'saveAs' function to export/import to a temp file
+    ' third  : Copy temp file to supplied filename. 
+    '          Need to use copyFile as VBS does not support a move to an existing file
+    ' fourth : Delete temp.
+    dim tmpFileName : tmpFileName = g_FSO.GetTempName()
+    dim tmpFilePath : tmpFilePath = g_FSO.GetAbsolutePathName(".")
+    dim tmpMsiFilePath : tmpMsiFilePath = g_FSO.BuildPath(tmpFilePath, tmpFileName)
+
+    SaveAs szFileName, tmpMsiFilePath
+    g_FSO.CopyFile tmpMsiFilePath, szFileName, true
+    g_FSO.DeleteFile tmpMsiFilePath
+
+    'Reload UI
+    if not bSaveAs then
+	pi_loadmsi szFileName, 0
+    end if
+
+    MsgBox "Saved " & szFileName, vbInformation, dialogTitle
+end function
+
+
+'For table: 0 = binary table, 1 = property table
+function pi_updateTableValue(msiInstaller, msi, table, key, value)
+    if value = "" or value = PROP_VALUE_NONE then
+        pi_deleteTableValue msi, table, key
+    else
+        pi_assignTableValue msiInstaller, msi, table, key, value
+    end if
+end function
+
+
+'For table: 0 = binary table, 1 = property table
+function pi_deleteTableValue(msi, table, key)
+    dim sql, view
+
+    if table = 0 then
+        sql = "DELETE FROM `Binary` WHERE `Name` = '" & key & "'"
+    else
+        sql = "DELETE FROM `Property` WHERE `Property` = '" & key & "'"
+    end if
+    
+    set view = msi.OpenView(sql)
+    view.Execute
+    view.Close
+end function
+
+
+'For table: 0 = binary table, 1 = property table
+function pi_assignTableValue(msiInstaller, msi, table, key, value)
+    dim record, sql, view
+
+    set record = msiInstaller.CreateRecord(2)
+    record.StringData(1) = key
+
+    if table = 0 then
+        sql = "SELECT `Name`, `Data` FROM `Binary`"
+        record.SetStream 2, value
+    else
+        sql = "SELECT `Property`, `Value` FROM `Property`"
+        record.StringData(2) = value
+    end if
+    
+    set view = msi.OpenView(sql)
+    view.Execute
+    view.Modify MSI_VIEW_MODIFY_ASSIGN, record
+    view.Close
+end function
+
+'Return a string when there is an error
+function pi_validateAutonomy(dgkv_name, dgci_name)
+    dim dgkv_item, dgci_item
+
+    pi_validateAutonomy = ""
+
+    'Check special cases. Check if the kvoop package is included then check if the full autonomy
+    ' package is also included. Give an error since the kvoop is only needed when autonomy is
+    ' not included in the package				      
+    set dgkv_item = g_SXSData.Item(dgkv_name)
+    if dgkv_item.current <> "" and dgkv_item.current <> PROP_VALUE_NONE then
+        on error resume next
+
+        set dgci_item = g_SXSData.Item(dgci_name)
+        if dgci_item.current <> "" and dgci_item.current <> PROP_VALUE_NONE then
+           pi_validateAutonomy = "The dgkv_autonomy package is only needed when the dgci_autonomy package is not included in the MSI."
+        end if
+    end if
+
+end function
+
+
+'Return false on fatal error, or if user chooses to abort at warning prompt
+function pi_validateFields(szTitle)
+    pi_validateFields = false
+
+    if not pi_validateRequiredProperties(szTitle) then
+        exit function
+    end if
+
+    dim error, x, item
+    for each x in g_SXSData.Keys()
+        set item = g_SXSData.Item(x)
+        if item.validator <> "" and item.current <> "" and item.current <> PROP_VALUE_NONE and item.current <> PROP_VALUE_EMBEDDED then
+            if not pi_validateSimplePattern(item.validator, item.current) then
+                dim display : display = x
+                if item.displayName <> "" then
+                    display = item.displayName
+                end if
+                error = error & display & ": Expected """ & item.validator & """, found """ & item.current & """" & chr(13)
+            end if
+        end if
+    next
+
+   if g_SXSData.Item(PROP_SERVERNAME).current <> "" then
+       if g_SXSData.Item(PROP_ALT_SERVERNAME).current <> "" then
+             if StrComp(g_SXSData.Item(PROP_SERVERNAME).current, g_SXSData.Item(PROP_ALT_SERVERNAME).current, vbTextCompare) = 0 then 
+                 MsgBox "Cannot save: Server name and alternate server name cannot be the same.", vbExclamation, szTitle
+                exit function
+	     end if  
+       end if
+   end if
+   
+    dim properties
+    properties = Array(PROP_SERVERPORT, PROP_ALT_SERVERPORT)
+    for each x in properties
+      'Check special cases as well
+       set item = g_SXSData.Item(x)
+       if item.current <> "" then
+           on error resume next
+           dim port : port = CLng(item.current)
+           if Err.number <> 0 or port <= 0 then
+               MsgBox "Cannot save: Server port """ & item.current & """ is invalid", vbExclamation, szTitle
+               exit function
+           end if
+           on error goto 0
+       end if
+     next
+					 
+    'Check special cases. Check if the kvoop package is included then check if the full autonomy
+    ' package is also included. Give an error since the kvoop is only needed when autonomy is
+    ' not included in the package. The warning error is only needed once, as it is generic.
+    dim retVal				      
+
+     retVal = pi_validateAutonomy("dgkv_autonomy_x86_64.zip", "dgci_autonomy_x86_64.zip")
+     if retVal <> "" then
+       MsgBox "Error: " & retVal, vbExclamation, szTitle
+       exit function
+    end if
+    set item = g_SXSData.Item(PROP_INSTALLDIR)
+    if item.current <> "" then
+        if not pi_validateFolder(item.current) then
+            MsgBox "Cannot save: Install Path """ & item.current & """ has invalid format or characters." & chr(13) & chr(13) & _
+                   "Install Path must be an absolute local or network path, cannot be a root folder, and cannot contain any of " & g_illegalChars, vbExclamation, szTitle
+            exit function
+        end if
+    end if
+
+    if error <> "" then
+        if vbYes <> MsgBox("Data validation found the following warnings:" & chr(13) & chr(13) & error & chr(13) & "Continue anyway?", vbExclamation + vbYesNo, szTitle) then
+            exit function
+        end if
+    end if
+
+    pi_validateFields = true
+end function
+
+
+'Return false on fatal error, or if user chooses to abort at warning prompt
+function pi_validateRequiredProperties(szTitle)
+    pi_validateRequiredProperties = false
+
+    'Anything in UI table 1 is required
+    dim error, x, item
+    for each x in g_SXSData.Keys()
+        set item = g_SXSData.Item(x)
+        if item.index = 1 and (item.current = "" or item.current = PROP_VALUE_NONE) then
+            error = error & x & " is blank" & chr(13)
+        end if
+    next
+    
+    'Check special cases as well
+    if g_SXSData.Item(PROP_SERVERNAME).current = "" then
+        error = error & "Server Name is blank" & chr(13)
+    end if
+
+    set item = g_SXSData.Item(PROP_UNINSTALLKEY)
+    if item.current = "" then
+        error = error & "Temporary Uninstall Key is blank" & chr(13)
+    end if
+
+    if item.current <> g_SXSData.Item(PROP_UNINSTALLKEYCONFIRM).current then
+        MsgBox "Cannot save: Temporary Uninstall Key and Confirm Uninstall Key do not match", vbExclamation, szTitle
+        exit function
+    end if
+
+    if error <> "" then
+        if vbYes <> MsgBox("Output MSI will not be valid for unattended installation:" & chr(13) & chr(13) & error & chr(13) & "Continue anyway?", vbExclamation + vbYesNo, szTitle) then
+            exit function
+        end if
+    end if
+
+    pi_validateRequiredProperties = true
+end function
+
+
+'Return true if szValue matches szPattern
+function pi_validateSimplePattern(szPattern, szValue)
+    dim pattern
+    pattern = Replace(szPattern, ".", "\.")
+    pattern = "^.*" & Replace(pattern, "*", ".*") & "$"
+
+    dim regex : set regex = CreateObject("VBScript.RegExp")
+	regex.Pattern = pattern
+    regex.IgnoreCase = true
+
+    pi_validateSimplePattern = regex.Test(szValue)
+end function
+
+
+function pi_validateFolder(szFolder)
+    'Breakdown of regexp:
+    '   (([a-zA-Z]\:)|(\\))                 opening c: or \
+    '   (\\[^\\" & g_illegalChars & "]+)+   \ plus one or more legal characters, at least one time
+    '   \\?                                 optional \ terminator
+	dim pattern : pattern = "^(([a-zA-Z]\:)|(\\))(\\[^\\" & g_illegalChars & "]+)+\\?$"
+	
+    dim regex : set regex = CreateObject("VBScript.RegExp")
+	regex.Pattern = pattern
+    regex.IgnoreCase = true
+	
+    pi_validateFolder = regex.Test(szFolder)
+end function
+
+
+function pi_setStatus(szString)
+    g_StatusCell.innerHTML = szString
+end function
+
+
+function pi_startProgress()
+    g_StatusCell.innerHTML = g_StatusMsg
+	g_iStatusIndx = 0
+	g_iTimerID = window.setInterval("pi_timerUpdateStatus", 500)
+end function
+
+
+function pi_endProgress()
+    window.clearInterval(g_iTimerID)
+end function
+
+
+Function pi_timerUpdateStatus()
+	If g_iStatusIndx < 10 Then
+		g_StatusCell.innerHTML = g_StatusCell.innerHTML & " . "
+		g_iStatusIndx = g_iStatusIndx + 1
+	Else
+		g_StatusCell.innerHTML = g_StatusMsg 
+		g_iStatusIndx = 0
+	End if
+End Function
+
+
+</script>
+<hta:application
+	applicationname="PushInstallMSIBuilder"	
+	border="thick"
+	borderstyle="normal"
+	caption="Verdasys, Inc."
+	contextmenu="no"
+	icon="msiexec.exe"
+	maximizebutton="no"
+	minimizebutton="yes"
+	navigable="no"
+	scroll="yes"
+	selection="no"
+	showintaskbar="yes"
+	singleinstance="no"
+	sysmenu="yes"
+	version="1.0"
+	windowstate="normal"
+>
+</head>
+<style type="text/css" media="screen">
+
+body
+{
+	margin-left: 15px;
+	margin-top: 15px;
+	font-family: arial, georgia, times, "times new roman", serif;
+	font-weight: normal;
+	font-size: 10px;
+	color: #000;
+	background-color: #fafafa;
+}
+
+input
+{
+	text-align: left;
+	font-family: arial;
+	font-weight: normal;
+	font-size: 10px;
+}
+
+#container
+{
+	margin: 0 0 0 0;
+	background-color: #FFF;
+	border: 1px solid #666;
+}
+
+#banner
+{
+	background-color: #FFF;
+	border-bottom: 1px solid #333;
+	background-image: url(data:image/jpeg;base64,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);
+	background-repeat: repeat-both;
+}
+
+#banner h1
+{
+	margin: 0;
+	padding: .5em;
+	color: #ffffff;
+}
+
+#banner img
+{
+	margin: 0em 1em 0em 1em;
+	padding: .5em;
+	float: left; 
+}
+
+#nav
+{
+	float: left;
+	width: 100px;
+	margin-left: 5px;
+	padding-top: 1em;
+}
+#nav p { margin-top: 0; }
+
+#content
+{
+	margin: 0em 0em 0em 115px;
+	border-left: 1px solid #000000;
+	background-color: #e4ebf8;
+}
+#content h2 { margin-top: 0; }
+
+table.inputList
+{
+	width: 770px;
+	background-color: #e4ebf8;
+	border: 1px #000000 solid;
+	margin: .5em .5em .5em .5em;    
+}
+
+td.inputListHeaderRow
+{
+	background-color: #5E5A80;
+	font-family: arial;
+	font-weight: bold;
+	font-size: 12px;
+	color: #ffffff;
+	filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=1, StartColorStr='#737CA1', EndColorStr='#98AFC7')
+}
+
+td.inputListLabel
+{
+	text-align: right;
+	font-family: arial;
+	font-weight: normal;
+	font-size: 10px;
+	width: 150px;
+	border-spacing: 0px;
+	white-space: nowrap    
+}
+
+td.inputListInput
+{
+	text-align: left;
+	font-family: arial;
+	font-weight: normal;
+	font-size: 10px;
+	border-spacing: 0px;
+	white-space: nowrap;
+}
+
+input.inputListText
+{
+    background-color: #eeeeee;
+}
+
+input.inputListButton
+{
+    text-align: center; 
+    width: 20px; 
+    height: 20px;
+}
+
+input.inputListButtonExport
+{
+    text-align: center; 
+    width: 50px; 
+    height: 20px;
+}
+
+input.inputListHidden
+{
+    display:none;
+}
+
+input.saveButton
+{
+    font-weight: bold; 
+    text-align: center; 
+    width: 75px; 
+    height: 20px; 
+    margin-left: .75em;
+}
+
+#statusBar
+{
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 15px;
+	border-style: solid;
+	border-color: #dcdcdc;
+	border-width: 1px;
+	filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr='#ffffff', EndColorStr='#c0c0c0') 
+}
+
+#statusBarTable
+{
+	width: 525px;
+	height: 10px;
+}
+
+#statusLabel
+{
+	width: 45px;
+	text-align: right;
+	font-family: arial;
+	font-weight: normal;
+	font-size: 10px;
+	border-right: 1px #c7c5b3 solid;
+	padding-right: .5em;
+}
+
+#statusCell
+{
+	width: 480px;
+	text-align: left;
+	font-family: arial;
+	font-weight: normal;
+	font-size: 10px;
+	border-left: 1px #ffffff solid;
+	padding-left: .5em;
+}
+
+
+</style>
+<!-- HTML goes here -->
+<body onload="pi_appload" onunload="pi_appclose">
+<div id="container">
+	<div id="banner">
+        <table>
+            <tr>
+                <td>
+                    <img src="data:image/png;base64,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">
+                </td>
+                <td>
+                    <h1>Digital Guardian MSI Tool</h1>
+                </td>
+            </tr>
+        </table>
+	</div>
+	<div id="nav">
+		<p>
+		This utility embeds properties and resource files into a version 6.0 or higher Digital Guardian Agent MSI installer.
+        </p><p>
+        Load a source MSI, and optionally autodetect side-by-side resources from the same folder (including agent.ini).
+        Fill in any additional properties or files that should be installed with the Agent, and choose "Save" or "Save As" to save them.
+        </p><p>
+        Properties and files whose names are marked with an asterisk [*] are applied at both install and upgrade.  
+        All other fields are used only at first installation; they are either constant or controlled from the DGMC afterwards. 
+        </p>
+	</div>
+	<div id="content">
+		<br>
+        <form name="form_msi">
+		<table class="inputList" cellpadding="2" cellspacing="2">
+			<tbody>
+				<tr>
+					<td colspan="2" class="inputListHeaderRow">Load MSI</td>
+				</tr>
+                <script language="vbscript">pi_writeTableRowMsi</script>
+			</tbody>	
+		</table>
+        </form>
+        <form name="form_data">
+		<table class="inputList" cellpadding="2" cellspacing="2">
+			<tbody>
+				<tr>
+					<td colspan="2" class="inputListHeaderRow">Required Properties For Unattended Installation</td>
+				</tr>
+				<tr>
+					<td class="inputListLabel">Server Name : </td>
+					<td class="inputListInput"><input type="text" id="SERVERNAME" size="40" onchange="pi_changed 'SERVERNAME'"></td>
+				</tr>
+				<tr>
+					<td class="inputListLabel">Temporary Uninstall Key : </td>
+					<td class="inputListInput"><input type="password" id="AUK" size="15" onchange="pi_changed 'AUK'"></td>
+				</tr>
+				<tr>
+					<td class="inputListLabel">Confirm Uninstall Key : </td>
+					<td class="inputListInput"><input type="password" id="AUK2" size="15" onchange="pi_changed 'AUK2'"></td>
+				</tr>
+                <script language="vbscript">pi_writeTable 1</script>
+			</tbody>	
+		</table>		
+		<table class="inputList" cellpadding="2" cellspacing="2">
+			<tbody>
+				<tr>
+					<td colspan="2" class="inputListHeaderRow">Server Configuration (optional)</td>
+				</tr>
+				<tr>
+					<td class="inputListLabel">Server Port : </td>
+					<td class="inputListInput"><input type="text" id="SERVERPORT" size="5" onchange="pi_changed 'SERVERPORT'"></td>
+				</tr>
+
+				<tr>
+				  <td class="inputListLabel">Use HTTPs : </td>
+				   <td class="inputListInput"><input type="checkbox" onclick="testHttpsCheckbox PROP_USEHTTPS" name="httpsCheckBox" id="USEHTTPS"></td>
+				</tr>
+			</tbody>	
+		</table>
+
+
+		<table class="inputList" cellpadding="2" cellspacing="2">
+			<tbody>
+				<tr>
+					<td colspan="2" class="inputListHeaderRow">Alternate Server Configuration (optional)</td>
+				</tr>
+
+				<tr>
+					<td class="inputListLabel">Server Name : </td>
+					<td class="inputListInput"><input type="text" id="ALTSERVERNAME" size="40" onchange="pi_changed PROP_ALT_SERVERNAME"></td>
+				</tr>
+				<tr>
+					<td class="inputListLabel">Server Port : </td>
+					<td class="inputListInput"><input type="text" id="ALTSERVERPORT" size="5" onchange="pi_changed PROP_ALT_SERVERPORT"></td>
+				</tr>
+
+				<tr>
+				  <td class="inputListLabel">Use HTTPs : </td>
+				   <td class="inputListInput"><input type="checkbox" onclick="testHttpsCheckbox PROP_ALT_USEHTTPS" name="altServerhttpsCheckBox" id="ALTUSEHTTPS"></td>
+				</tr>
+
+			</tbody>	
+		</table>
+
+		
+		<table class="inputList" cellpadding="2" cellspacing="2">
+			<tbody>
+				<tr>
+					<td colspan="2" class="inputListHeaderRow">Properties (optional)</td>
+				</tr>
+				<tr>
+					<td class="inputListLabel">Install Path : </td>
+					<td class="inputListInput"><input type="text" id="INSTALLDIR" size="118" onchange="pi_changed 'INSTALLDIR'"></td>
+				</tr>
+				
+				<script language="vbscript">pi_writeTable 2 : pi_writeTableRow PROP_POSTINSTALLFILENAME</script>
+			</tbody>	
+		</table>
+		<table class="inputList" cellpadding="2" cellspacing="2">
+			<tbody>
+				<tr>
+					<td colspan="2" class="inputListHeaderRow">Feature Packages</td>
+				</tr>
+                <script language="vbscript">pi_writeTable 3</script>
+			</tbody>	
+		</table>
+        </form>
+		<br/>
+		<input type="button" class="saveButton" name="save" value="Save" onclick="pi_save document.getElementById(ID_MSI_INPUT).value,false"/>
+		<input type="button" class="saveButton" name="saveas" value="Save As..." onclick="pi_save document.getElementById(ID_MSI_INPUT).value,true"/>
+		<input type="button" class="saveButton" name="exit" value="Exit" onclick="window.close"/>
+		<br/>
+        <br/>
+	</div>
+	<div id="statusBar">
+		<table id="statusBarTable" cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr>
+					<td id="statusLabel">Status</td>
+					<td id="statusCell"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+</form>
+</body>
+</html>

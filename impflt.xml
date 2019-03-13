@@ -1,0 +1,1387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.verdasys.com/schemas/fileformat.xsd" xmlns:x="http://www.verdasys.com/schemas/fileformat.xsd">
+    <filetypes>
+      
+      <filetype name="executable/">
+          <filesignature>
+            <!-- 'MZ' MS-DOS -->
+            <chunk>
+              <offset>0</offset>
+              <value>4D5A</value>
+            </chunk>
+          </filesignature>
+          <filesignature>
+            <!-- 'NE' Windows 3.1 -->
+            <chunk>
+              <offset>0</offset>
+              <value>4E45</value>
+            </chunk>
+          </filesignature>
+          <filesignature>
+            <!-- 'PE' Win32 -->
+            <chunk>
+              <offset>0</offset>
+              <value>5045</value>
+            </chunk>
+          </filesignature>
+          <filesignature>
+            <!-- 'LE' OS/2 -->
+            <chunk>
+              <offset>0</offset>
+              <value>4C45</value>
+            </chunk>
+          </filesignature>
+          <filesignature>
+            <!-- 'LX' OS/2 -->
+            <chunk>
+              <offset>0</offset>
+              <value>4C58</value>
+            </chunk>
+          </filesignature>
+        </filetype>
+      
+        <filetype name="document/msofficelegacy">
+            <filesignature>
+                <!-- MS DOC PPT XLS MSI -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>D0CF11E0A1B11AE1</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <filetype name="system/registry">
+            <filesignature>
+                <!-- WinNT SYSTEM/Registry file 'regf' -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>72656766</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- This one is for Crypto Keys -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>0200000000000000</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- MS Office Open XML formats -->
+        <filetype name="document/msofficeopenxml">
+          <filesignature>
+            <!-- DOCX PPTX XLSX -->
+            <chunk>
+              <offset>0</offset>
+              <value>504B030414000600</value>
+            </chunk>
+          </filesignature>
+        </filetype>
+      
+         <!-- Adobe PDF -->
+        <filetype name="document/pdf">
+          <filesignature>
+            <!-- PDF FDF -->
+            <chunk>
+              <offset>0</offset>
+              <value>25504446</value>
+            </chunk>
+          </filesignature>
+        </filetype>
+
+        <!-- Windows System Monitor Logs -->
+        <filetype name="system/performancelog">
+            <filesignature>
+                <!-- file prolog -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>00000100</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- Windows Managed Object File-->
+        <filetype name="system/wmidata">
+            <filesignature>
+                <!-- file prolog #p from #pragma-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>2370</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- file prolog #p from #pragma (wide chars)-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>FFFE23007000</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- file prolog  // from commented line-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>2F2F</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- MS Security Catalog -->
+        <filetype name="system/mssecuritycatalog">
+            <filesignature>
+                <!-- 3082 - Advanced Disk Catalog Disk Catalog -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>3082</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- 3083 - Advanced Disk Catalog Disk Catalog -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>3083</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- COM+ - COM+ Catalog file -->
+        <filetype name="system/compluscatalog">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>434F4D2B</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!--Extensible Storage Engine Database File  -->
+        <filetype name="system/datastore">
+            <filesignature>
+                <!-- DataStore edb file -->
+                <chunk>
+                    <offset>2</offset>
+                    <value>EFCDAB89</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>4</offset>
+                    <value>EFCDAB89</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- Symantic Endpoint Protection -->
+        <filetype name="other/symantecendpointprotection">
+            <filesignature>
+                <!-- @\r\n@ -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>400D0A40</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- \\\r\n\\ -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>5C0D0A5C</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- UniCode Extensions -->
+        <filetype name="system/unicodeextensions">
+            <filesignature>
+                <!-- UCEX -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>55434558</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- Windows Icon-->
+        <filetype name="graphics/winicon">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>00000100</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- Windows Cursor -->
+        <filetype name="graphics/wincursor">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>00000200</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <filetype name="system/winhelp">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>3F5F0300</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4C4E0200</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Microsoft Outlook Personal Folder file -->
+        <filetype name="archive/msoutlook">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>2142444E</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Windows bitmap image -->
+        <filetype name="graphics/winbitmap">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>424D</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Graphics interchange format file -->
+        <filetype name="graphics/imagegif">
+            <filesignature>
+                <!-- GIF87a-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>474946383761</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- GIF89a-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>474946383961</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Tag image file format -->
+        <filetype name="graphics/tiff">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4949</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- RAR compressed archive file -->
+        <filetype name="archive/rarcompressed">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>526172211A07</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- 7z compressed archive file -->
+        <filetype name="archive/7zcompressed">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>377ABCAF271C</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- bzip2 compressed archive file -->
+        <filetype name="archive/bz2compressed">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>425A68</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- gzip compressed archive file -->
+        <filetype name="archive/gzipcompressed">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>1F8B08</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- lzh compressed archive file -->
+        <filetype name="archive/lzhcompressed">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>2D6C68</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>4</offset>
+                    <value>2D6C68</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Windows shortcut file -->
+        <filetype name="link/winshortcut">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4C00000001140200</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Microsoft Cabinet file -->
+        <filetype name="archive/mscabinet">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4D534346</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Musical Instrument Digital Interface -->
+        <filetype name="audiovideo/soundmidi">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4D546864</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- True Type font -->
+        <filetype name="font/truetype">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>0001000000</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4F54544F</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- True Type font collection -->
+        <filetype name="font/truetypecollection">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>74746366</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Audio for Windows -->
+        <filetype name="audiovideo/soundwave">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>52494646</value>
+                </chunk>
+                <chunk>
+                    <offset>8</offset>
+                    <value>57415645666D7420</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Real media file -->
+        <filetype name="audiovideo/soundreal">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>2E524D46</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Apple media file -->
+        <filetype name="audiovideo/apple">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>00000020667479704D3441</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+         <!-- 3GPP and 3GPP2 media files -->
+        <filetype name="audiovideo/3gp">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>0000001466747970</value>
+                </chunk>
+                <chunk>
+                    <offset>0</offset>
+                    <value>0000002066747970</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Ogg Vorbis Codec compressed Multimedia file -->
+        <filetype name="audiovideo/oggvorbis">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>4F67675300020000</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- JPEG/JFIF graphics file -->
+        <filetype name="graphics/jpeg">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>FFD8FF</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!--  Portable Network Graphics file -->
+        <filetype name="graphics/png">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>89504E470D0A1A0A</value>
+              </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- PF file -->
+        <filetype name="system/prefetchdata">
+            <filesignature>
+                <!-- Windows\Prefetch\*.pf XP, 2003 -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>11000000534343410F000000</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- Windows\Prefetch\*.pf VISTA, Win7-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>170000005343434111000000</value>
+                  </chunk>
+            </filesignature>
+              <filesignature>
+                <!-- Windows\Prefetch\*.pf Win8.1-->
+                  <chunk>
+                    <offset>0</offset>
+                    <value>1A0000005343434111000000</value>
+                  </chunk>
+            </filesignature>
+            <!-- Java PF files -->
+            <filesignature>
+                <chunk>
+                    <!-- 'HLino' -->
+                    <offset>3</offset>
+                    <value>484C696E6F</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <!-- 'KCMS' -->
+                    <offset>4</offset>
+                    <value>4B434D53</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- XML file -->
+        <filetype name="document/xml">
+            <filesignature>
+                <!-- <?xml -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>3C3F786D6C</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+         <!-- Rich Text Format file -->
+        <filetype name="document/rtf">
+            <filesignature>
+                <!-- {rtf1 -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>7B5C72746631</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- IBM Notes Storage Facility (Lotus) -->
+        <filetype name="document/nsf">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>1A00</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- MANIFEST file -->
+        <filetype name="document/manifestfile">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>FFFE3C003F0078006D006C</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>EFBBBF3C3F786D6C</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- <?xml -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>3C3F786D6C</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- OLE Type Library -->
+        <filetype name="executable/typelibrary">
+            <filesignature>
+                <!-- 'MZ' -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>4D5A</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- 'MSFT' -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>4D534654</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Video for Windows -->
+        <filetype name="audiovideo/videoavi">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>52494646</value>
+                </chunk>
+                <chunk>
+                    <offset>8</offset>
+                    <value>415649</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- QuickTime movie file -->
+        <filetype name="audiovideo/videoquicktime">
+            <filesignature>
+                <chunk>
+                    <offset>4</offset>
+                    <value>6D6F6F76</value>
+                </chunk>
+                <chunk>
+                    <offset>0</offset>
+                    <value>000000146674797071742020</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- MPEG video file -->
+        <filetype name="audiovideo/videompeg">
+            <filesignature>
+                <!-- MPEG-4 video file -->
+                <chunk>
+                  <offset>0</offset>
+                  <value>0000001466747970</value>
+                </chunk>
+                <chunk>
+                  <offset>0</offset>
+                  <value>0000001866747970</value>
+                </chunk>
+                <chunk>
+                  <offset>0</offset>
+                  <value>0000001C66747970</value>
+                </chunk>
+                <!-- MPEG video file 00 00 01 Bx -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>000001</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Shockwave Flash file -->
+        <filetype name="audiovideo/videoshockwave">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>465753</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>435753</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- IE History file -->
+        <filetype name="link/clienturlcache">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>436C69656E742055726C4361636865</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Personal Usage Data -->
+        <filetype name="system/personalusagedata">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>1900040019001900</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- BTR WBEM Index files -->
+        <filetype name="btrwbem">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>CCAC</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- DIC IME Dictionary File -->
+        <filetype name="graphics/imedic">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>53554400</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Print Job Options -->
+        <filetype name="system/printjoboptions">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>3C3C0D0A</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+        
+        <!-- SDB SYSTEM/ Database Files -->
+        <filetype name="system/database">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>020000004912010073646266</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Portable Network Graphics Frame Bitmap and Precompiled INF -->
+        <filetype name="graphics/pnfbitmap">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>01010200</value>
+                </chunk>
+                <chunk>
+                    <offset>0</offset>
+                    <value>01030200</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Command Extensions  -->
+        <filetype name="executable/command">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>406563686f20</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Java bytecode  -->
+        <filetype name="executable/javabytecode">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>CAFEBABE</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Config files  -->
+        <filetype name="other/config">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>fffe3c003f0078006d006c00</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- <?xml  -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>3c3f786d6c</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>feff003c003f0078006d006c</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- ZIP compressed archive file -->
+        <filetype name="archive/zipcompressed">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>504B0304</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- Open office document (same signature as ZIP compressed file) -->
+        <filetype name="document/openoffice">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>504B0304</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+         <!-- Tape Archive -->
+        <filetype name="archive/tapearchive">
+            <filesignature>
+                <!-- ustar -->
+                <chunk>
+                    <offset>257</offset>
+                    <value>7573746172</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- JAVA Archive -->
+        <filetype name="executable/javaarchive">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>504B0304</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <filetype name="system/">
+            <filesignature>
+                <!-- Windows (1)-->
+                <chunk>
+                    <offset>0</offset>
+                    <value>E9</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- Windows/DOS (2) -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>FF</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- 'MZ' MS-DOS -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>4D5A</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- Windows/DOS (2) -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>1E</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- Windows/DOS (3) -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>BC</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- NTDETECT.COM -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>665566</value>
+                </chunk>
+            </filesignature>
+            
+        </filetype>
+      
+       <!-- MS  Common Console Document-->
+        <filetype name="executable/mscommonconsole">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>D0CF11E0</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- <?xml -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>3C3F786D6C</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <!-- 'MZ' -->
+                <chunk>
+                    <offset>0</offset>
+                    <value>4D5A</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <!-- MPEG audio file -->
+        <filetype name="audiovideo/soundmpeg">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>FF</value>
+                </chunk>
+            </filesignature>
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>494433</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+      
+        <filetype name="other/configini">
+            <file-processor guid="IniFileProcessor"/>
+        </filetype>
+        <filetype name="document/html">
+            <file-processor guid="HTMLFileProcessor"/>
+        </filetype>
+        <filetype name="system/nls">
+            <file-processor guid="NLSFileProcessor"/>
+        </filetype>
+        <filetype name="executable/selfextractexec">
+            <file-processor guid="SelfExtractExec"/>
+        </filetype>
+
+
+        <filetype name="officetemplate">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>D0CF</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <filetype name="officetemplatexmlzip">
+            <filesignature>
+                <chunk>
+                    <offset>0</offset>
+                    <value>504B</value>
+                </chunk>
+            </filesignature>
+        </filetype>
+
+        <!-- Command Extensions  -->
+
+    </filetypes>
+
+    <file-extentions>
+        <!-- OLE Compound Files -->
+        <file-extention name="doc" typeref="document/msofficelegacy"/>
+        <file-extention name="ppt" typeref="document/msofficelegacy"/>
+        <file-extention name="xls" typeref="document/msofficelegacy"/>
+        <file-extention name="vsd" typeref="document/msofficelegacy"/>
+        <file-extention name="msi" typeref="document/msofficelegacy"/>
+
+        <!-- SYSTEM/Registry -->
+        <file-extention name="log" typeref="system/registry"/>
+        <file-extention name="sav" typeref="system/registry"/>
+        <file-extention name="dat" typeref="system/registry"/>
+
+        <!-- SYSTEM/PerformanceLog -->
+        <file-extention name="blg" typeref="system/performancelog"/>
+
+        <!-- Install MST/MSC -->
+        <file-extention name="mst" typeref="executable/mscommonconsole"/>
+        <file-extention name="msc" typeref="executable/mscommonconsole"/>
+
+        <!-- Windows Managed Object File -->
+        <file-extention name="mof" typeref="system/wmidata"/>
+
+        <!-- Extensible Storage Engine Database File-->
+        <file-extention name="edb" typeref="system/datastore"/>
+
+        <!-- SYSTEM/MSSecurityCatalog -->
+        <file-extention name="cat" typeref="system/mssecuritycatalog"/>
+
+        <!-- COM+ catalog file -->
+        <file-extention name="clb" typeref="system/compluscatalog"/>
+
+        <!-- Self Extracting EXECUTABLE/ -->
+        <file-extention name="exe" typeref="executable/selfextractexec"/>
+
+        <!-- EXECUTABLE/ -->
+        <file-extention name="exe" typeref="executable/"/>
+        <file-extention name="dll" typeref="executable/"/>
+        <file-extention name="sys" typeref="executable/"/>
+        <file-extention name="drv" typeref="executable/"/>
+        <file-extention name="rll" typeref="executable/"/>
+        <file-extention name="qts" typeref="executable/"/>
+        <file-extention name="qtx" typeref="executable/"/>
+        <file-extention name="ax"  typeref="executable/"/>
+        <file-extention name="cpl" typeref="executable/"/>
+        <file-extention name="fon" typeref="executable/"/>
+        <file-extention name="flt" typeref="executable/"/>
+        <file-extention name="ocx" typeref="executable/"/>
+        <file-extention name="olb" typeref="executable/"/>
+        <file-extention name="scr" typeref="executable/"/>
+        <file-extention name="vbx" typeref="executable/"/>
+        <file-extention name="vxd" typeref="executable/"/>
+        <file-extention name="386" typeref="executable/"/>
+        <file-extention name="api" typeref="executable/"/>
+        <file-extention name="msstyles" typeref="executable/"/>
+        <file-extention name="com" typeref="executable//"/>
+        <file-extention name="wpc" typeref="executable/"/>
+        <file-extention name="ime" typeref="executable/"/>
+        <file-extention name="dic" typeref="executable/"/>
+        <file-extention name="tsp" typeref="executable/"/>
+        <file-extention name="acm" typeref="executable/"/>
+        <file-extention name="iec" typeref="executable/"/>
+        <file-extention name="mui" typeref="executable/"/>
+
+        <!-- SEP Plugin -->
+        <file-extention name="plg" typeref="executable/"/>
+
+        <!-- SYSTEM/ -->
+        <file-extention name="sys" typeref="system/"/>
+        <file-extention name="com" typeref="system/"/>
+
+        <!-- EXECUTABLE/TypeLibrary -->
+        <file-extention name="tlb" typeref="executable/typelibrary"/>
+
+        <!-- GRAPHICS/WinIcon -->
+        <file-extention name="ico" typeref="graphics/winicon"/>
+
+        <!-- GRAPHICS/WinIcon -->
+        <file-extention name="cur" typeref="graphics/wincursor"/>
+
+        <!-- SYSTEM/WinHelp -->
+        <file-extention name="hlp" typeref="system/winhelp"/>
+
+        <!-- Microsoft Outlook Personal Folder file -->
+        <file-extention name="pst" typeref="archive/msoutlook"/>
+        <file-extention name="ost" typeref="archive/msoutlook"/>
+
+        <!-- Windows bitmap image -->
+        <file-extention name="bmp" typeref="graphics/winbitmap"/>
+        <file-extention name="dib" typeref="graphics/winbitmap"/>
+        <file-extention name="ico" typeref="graphics/winbitmap"/>
+
+        <!-- Graphics interchange format file -->
+        <file-extention name="gif" typeref="graphics/imagegif"/>
+
+        <!-- Tag image file format -->
+        <file-extention name="tif" typeref="graphics/tiff"/>
+
+        <!-- Windows shortcut file -->
+        <file-extention name="lnk" typeref="link/winshortcut"/>
+
+        <!-- Microsoft Cabinet file -->
+        <file-extention name="cab" typeref="archive/mscabinet"/>
+        <!-- Powerpoint Packaged Presentation -->
+        <file-extention name="ppz" typeref="archive/mscabinet"/>
+        <!-- Microsoft Access Snapshot Viewer file -->
+        <file-extention name="snp" typeref="archive/mscabinet"/>
+
+        <!-- Musical Instrument Digital Interface -->
+        <file-extention name="mid" typeref="audiovideo/soundmidi"/>
+        <file-extention name="midi" typeref="audiovideo/soundmidi"/>
+
+        <!-- True Type font -->
+        <file-extention name="ttf" typeref="font/truetype"/>
+        <file-extention name="otf" typeref="font/truetype"/>
+
+        <!-- True Type font collection -->
+        <file-extention name="ttc" typeref="font/truetypecollection"/>
+
+        <!-- Audio for Windows -->
+        <file-extention name="wav" typeref="audiovideo/soundwave"/>
+
+        <!-- Real media file -->
+        <file-extention name="rmf" typeref="audiovideo/soundreal"/>
+      
+        <!-- Apple media file -->
+        <file-extention name="m4a" typeref="audiovideo/apple"/>
+      
+        <!-- 3GPP and 3GPP2 media files -->
+        <file-extention name="3gp" typeref="audiovideo/3gp"/>
+        <file-extention name="3g2" typeref="audiovideo/3gp"/>
+      
+        <!-- Ogg Vorbis media file -->
+        <file-extention name="oga" typeref="audiovideo/oggvorbis"/>
+        <file-extention name="ogg" typeref="audiovideo/oggvorbis"/>
+        <file-extention name="ogv" typeref="audiovideo/oggvorbis"/>
+        <file-extention name="ogx" typeref="audiovideo/oggvorbis"/>
+
+        <!-- JPEG/JFIF graphics file -->
+        <file-extention name="jfif" typeref="graphics/jpeg"/>
+        <file-extention name="jpe" typeref="graphics/jpeg"/>
+        <file-extention name="jpeg" typeref="graphics/jpeg"/>
+        <file-extention name="jpg" typeref="graphics/jpeg"/>
+
+        <file-extention name="png" typeref="graphics/png"/>
+
+        <!-- PF file -->
+        <file-extention name="pf" typeref="system/prefetchdata"/>
+
+        <!-- INI file -->
+        <file-extention name="ini" typeref="other/configini"/>
+        <file-extention name="url" typeref="other/configini"/>
+        <file-extention name="inf" typeref="other/configini"/>
+
+        <!-- XML file -->
+        <file-extention name="xml" typeref="document/xml"/>
+      
+        <!-- Rich Text file -->
+        <file-extention name="rtf" typeref="document/rtf"/>
+
+        <!-- IBM Notes Storage Facility (Lotus) -->
+        <file-extention name="nsf" typeref="document/nsf"/>
+        
+        <!-- MANIFEST file -->
+        <file-extention name="manifest" typeref="document/manifestfile"/>
+
+        <!-- Video for Windows -->
+        <file-extention name="avi" typeref="audiovideo/videoavi"/>
+
+        <!-- QuickTime movie file -->
+        <file-extention name="mov" typeref="audiovideo/videoquicktime"/>
+
+        <!-- MPEG video file -->
+        <file-extention name="mpg" typeref="audiovideo/videompeg"/>
+        <file-extention name="mp4" typeref="audiovideo/videompeg"/>
+        <file-extention name="m4v" typeref="audiovideo/videompeg"/>
+
+        <!-- MPEG audio file -->
+        <file-extention name="mpg" typeref="audiovideo/soundmpeg"/>
+        <file-extention name="mp3" typeref="audiovideo/soundmpeg"/>
+
+        <!-- Shockwave Flash file -->
+        <file-extention name="swf" typeref="audiovideo/videoshockwave"/>
+
+        <!-- HTML Document -->
+        <file-extention name="html" typeref="document/html"/>
+        <file-extention name="htm" typeref="document/html"/>
+
+        <!-- Microsoft code page file -->
+        <file-extention name="nls" typeref="system/nls"/>
+
+        <!-- Client UrlCache -->
+        <file-extention name="dat" typeref="link/clienturlcache"/>
+
+        <!-- Personal Usage Data -->
+        <file-extention name="pip" typeref="system/personalusagedata"/>
+
+        <!-- WBEM BTR Index -->
+        <file-extention name="btr" typeref="btrwbem"/>
+
+        <!-- Print Job Options -->
+        <file-extention name="joboptions" typeref="system/printjoboptions"/>
+
+        <!-- ZIP Archive Files -->
+        <file-extention name="zip" typeref="archive/zipcompressed"/>
+        <file-extention name="jar" typeref="executable/javaarchive"/>
+        <file-extention name="odt" typeref="archive/zipcompressed"/>
+        <file-extention name="odp" typeref="archive/zipcompressed"/>
+        <file-extention name="ott" typeref="archive/zipcompressed"/>
+      
+        <file-extention name="sxc" typeref="document/openoffice"/>
+        <file-extention name="sxd" typeref="document/openoffice"/>
+        <file-extention name="sxi" typeref="document/openoffice"/>
+        <file-extention name="sxw" typeref="document/openoffice"/>
+
+        <!-- RAR Archive Files -->
+        <file-extention name="rar" typeref="archive/rarcompressed"/>
+      
+        <!-- 7z Archive Files -->
+        <file-extention name="7z" typeref="archive/7zcompressed"/>
+
+        <!-- BZ2 Archive Files -->
+        <file-extention name="bz2" typeref="archive/bz2compressed"/>
+        <file-extention name="tb2" typeref="archive/bz2compressed"/>
+        <file-extention name="tbz2" typeref="archive/bz2compressed"/>
+      
+        <!-- gzip Archive Files -->
+        <file-extention name="gz" typeref="archive/gzipcompressed"/>
+      
+        <!-- lzh Archive Files -->
+        <file-extention name="lzh" typeref="archive/lzhcompressed"/>
+      
+        <!-- Tape Archive Files -->
+        <file-extention name="tar" typeref="archive/tapearchive"/>
+
+        <!-- DIC IME Dictionary File -->
+        <file-extention name="dic" typeref="graphics/imedic"/>
+
+        <!-- SDB SYSTEM/ Database Files -->
+        <file-extention name="sdb" typeref="system/database"/>
+
+        <!-- Portable Network Graphics Frame Bitmap  -->
+        <file-extention name="pnf" typeref="graphics/pnfbitmap"/>
+
+        <!-- Command Extensions  -->
+        <file-extention name="cmd" typeref="executable/command"/>
+      
+        <!-- Command Extensions  -->
+        <file-extention name="class" typeref="executable/javabytecode"/>
+
+        <!-- Config files  -->
+        <file-extention name="config" typeref="other/config"/>
+
+        <!-- Office Template files  -->
+		<!-- Template files removed as part of Sharepoint-STE (DGAGENT-2701) -->
+
+        <!-- OTHER/SymantecEndpointProtection -->
+        <file-extention name="sep" typeref="other/symantecendpointprotection"/>
+
+        <!-- UniCode Extensions -->
+        <file-extention name="uce" typeref="system/unicodeextensions"/>
+      
+        <!-- MS Office Open XML -->
+        <file-extention name="docx" typeref="document/msofficeopenxml"/>
+        <file-extention name="pptx" typeref="document/msofficeopenxml"/>
+        <file-extention name="xlsx" typeref="document/msofficeopenxml"/>
+      
+         <!-- Adobe PDF -->
+        <file-extention name="pdf" typeref="document/pdf"/>
+        <file-extention name="fdf" typeref="document/pdf"/>
+
+    </file-extentions>
+
+    <filter-masks>
+        <!--	Every bit of filtering mask represents an event type.
+            The folowing are DG's event types:
+        
+            USER_CD_BURN                      = 0x00000001,
+            USER_NET_TRANSFER_DOWNLOAD        = 0x00000002,
+            USER_NET_TRANSFER_UPLOAD          = 0x00000004,
+            USER_NET_OP                       = 0x00000008,
+            USER_FILE_ARCHIVE                 = 0x00000010,
+            USER_FILE_EXTRACT                 = 0x00000020,
+            USER_FILE_SAVEAS                  = 0x00000040,
+            USER_FILE_EDIT                    = 0x00000080,
+            USER_FILE_CREATE                  = 0x00000100,
+            USER_FILE_DELETE                  = 0x00000200,
+            USER_FILE_COPY                    = 0x00000400,
+            USER_FILE_MOVE                    = 0x00000800,
+            USER_FILE_OPEN                    = 0x00001000,
+            USER_FILE_RENAME                  = 0x00002000,
+            USER_FILE_READ                    = 0x00004000,
+            USER_FILE_WRITE                   = 0x00008000,
+            USER_FILE_RECYCLE                 = 0x00010000,
+            USER_FILE_RESTORE                 = 0x00020000,
+            USER_FILE_SETINFORMATION          = 0x00040000,
+            USER_FILE_CLOSE                   = 0x00080000,
+            USER_APP_DATA_EXCHANGE            = 0x00100000,
+            USER_PRINT_FILE                   = 0x00200000,
+            USER_ACTION_LOGON                 = 0x00400000,
+            USER_ACTION_LOGOFF                = 0x00800000,
+            USER_APP_LOGON                    = 0x01000000,
+            USER_APP_DATA_ACTION              = 0x02000000,
+            USER_APPLICATION_ACTION           = 0x04000000,
+            USER_ADE_CUT                      = 0x08000000,
+            USER_ADE_PRINTSCREEN              = 0x10000000,
+            USER_ADE_PRINTPROCESS             = 0x20000000,
+            USER_SEND_MAIL                    = 0x40000000,
+            USER_FILE_CLASSIFICATION          = 0x80000000,
+            USER_APP_BUFFER_CLASSIFICATION  = 0x0100000000,
+            USER_FILE_DECRYPT               = 0x0200000000,
+            USER_ADE_SCREEN_CAPTURE         = 0x0400000000,
+            USER_MAIL_ATTACH                = 0x0800000000,
+            USER_MODE_EXCLUDE_ENCRYPTION    = 0x1000000000,
+            USER_ADE_INSERT_FILE            = 0x2000000000,
+            USER_ADE_INSERT_NEW_OBJECT      = 0x4000000000,
+            USER_DOC_REPOSITORY             = 0x8000000000,
+            USER_FILE_VIEW                 = 0x10000000000,
+            DEVICE_DETECTED                = 0x20000000000,
+            DEVICE_MISSING                 = 0x40000000000,
+            DEVICE_ADDED                   = 0x80000000000,
+            DEVICE_REMOVED                = 0x100000000000,
+            USER_APPLICATION_ACTION_EX    = 0x200000000000
+            
+            For instance, mask 137E80 represents the following event types:
+                
+            USER_FILE_EDIT
+            USER_FILE_DELETE
+            USER_FILE_COPY
+            USER_FILE_MOVE
+            USER_FILE_OPEN
+            USER_FILE_RENAME
+            USER_FILE_READ
+            USER_FILE_RECYCLE
+            USER_FILE_RESTORE
+            USER_APP_DATA_EXCHANGE
+        -->
+        <!-- USER_MODE_EXCLUDE_ENCRYPTION | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE | USER_FILE_CLASSIFICATION | USER_FILE_CREATE : 10801B5F00 -->
+        <filter-mask mask="10801b5f00"   typeref="system/registry"/>
+        <filter-mask mask="10801b5f00"   typeref="system/compluscatalog"/>
+        <filter-mask mask="10801b5f00"   typeref="executable/mscommonconsole"/>
+
+        <!-- USER_FILE_CREATE | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN  | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE | USER_FILE_CLASSIFICATION : 801B5F00 -->
+        <filter-mask mask="801b5f00"   typeref="system/performancelog"/>
+        <filter-mask mask="801b5f00"   typeref="system/wmidata"/>
+        <filter-mask mask="801b5f00"   typeref="system/datastore"/>
+        <filter-mask mask="801b5f00"   typeref="system/mssecuritycatalog"/>
+
+        <!-- NOTHING!!!! : 00000000 -->
+        <filter-mask mask="00000000" typeref="executable/selfextractexec"/>
+        <filter-mask mask="00000000" typeref="document/msofficeopenxml"/>
+        <filter-mask mask="00000000" typeref="document/pdf"/>
+        <filter-mask mask="00000000" typeref="document/xml"/>
+        <filter-mask mask="00000000" typeref="document/rtf"/>
+        <filter-mask mask="00000000" typeref="document/nsf"/>
+        <filter-mask mask="00000000" typeref="document/msofficelegacy"/>
+        <filter-mask mask="00000000" typeref="document/openoffice"/>
+        <filter-mask mask="00000000" typeref="archive/rarcompressed"/>
+        <filter-mask mask="00000000" typeref="archive/7zcompressed"/>
+        <filter-mask mask="00000000" typeref="archive/bz2compressed"/>
+        <filter-mask mask="00000000" typeref="archive/gzipcompressed"/>
+        <filter-mask mask="00000000" typeref="archive/lzhcompressed"/>
+        <filter-mask mask="00000000" typeref="archive/zipcompressed"/>
+        <filter-mask mask="00000000" typeref="archive/tapearchive"/>
+        <filter-mask mask="00000000" typeref="executable/javaarchive"/>
+
+        <!--  USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_RECYCLE | USER_FILE_RESTORE,
+         USER_FILE_CLOSE | USER_APP_DATA_EXCHANGE | USER_MODE_EXCLUDE_ENCRYPTION | USER_FILE_CLASSIFICATION : 10801b0E00 -->
+        <filter-mask mask="10801b0e00" typeref="executable/"/>
+
+        <!-- USER_FILE_CREATE | USER_MODE_EXCLUDE_ENCRYPTION | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE | USER_FILE_CLASSIFICATION | USER_MODE_EXCLUDE_ENCRYPTION: 10801b5F00 -->
+        <filter-mask mask="10801b5f00" typeref="system/"/>
+        <filter-mask mask="10801b5f00" typeref="other/symantecendpointprotection"/>
+
+        <!-- USER_FILE_CREATE | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE | USER_FILE_CLASSIFICATION : 801b5f00 -->
+        <filter-mask mask="801b5f00" typeref="graphics/winicon"/>
+        <filter-mask mask="801b5f00" typeref="graphics/wincursor"/>
+        <filter-mask mask="801b5f00" typeref="system/winhelp"/>
+        <filter-mask mask="801b5f00" typeref="system/unicodeextensions"/>
+
+        <!-- USER_FILE_DELETE | USER_FILE_OPEN | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE : 1b5200 -->
+        <filter-mask mask="1b5200" typeref="archive/msoutlook"/>
+
+        <!-- USER_FILE_EDIT | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN | USER_FILE_CLOSE | USER_FILE_RENAME | 
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE : 1b7e80 -->
+        <filter-mask mask="1b7e80"   typeref="document/html"/>
+
+        <!-- USER_FILE_CREATE | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE : 1b5f00 -->
+        <filter-mask mask="1b5f00" typeref="graphics/winbitmap"/>
+        <filter-mask mask="1b5f00" typeref="graphics/imagegif"/>
+        <filter-mask mask="1b5f00" typeref="graphics/tiff"/>
+        <filter-mask mask="1b5f00" typeref="graphics/jpeg"/>
+        <filter-mask mask="1b5f00" typeref="graphics/png"/>
+        <filter-mask mask="1b5f00" typeref="graphics/imedic"/>
+
+        <!-- USER_FILE_CREATE | USER_FILE_DELETE | USER_FILE_COPY | USER_FILE_MOVE | USER_FILE_OPEN | USER_FILE_CLOSE,
+        USER_FILE_READ | USER_FILE_RECYCLE | USER_FILE_RESTORE | USER_APP_DATA_EXCHANGE | USER_FILE_CLASSIFICATION : 801b5f00 -->
+        <filter-mask mask="801b5f00" typeref="link/winshortcut"/>
+        <filter-mask mask="801b5f00" typeref="archive/mscabinet"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/soundmidi"/>
+        <filter-mask mask="801b5f00" typeref="font/truetype"/>
+        <filter-mask mask="801b5f00" typeref="font/truetypecollection"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/soundwave"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/soundreal"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/apple"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/3gp"/>
+        <filter-mask mask="801b5f00" typeref="system/prefetchdata"/>
+        <filter-mask mask="801b5f00" typeref="other/configini"/>
+        <filter-mask mask="801b5f00" typeref="document/manifestfile"/>
+        <filter-mask mask="801b5f00" typeref="executable/typelibrary"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/videoavi"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/videoquicktime"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/videompeg"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/soundmpeg"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/videoshockwave"/>
+        <filter-mask mask="801b5f00" typeref="audiovideo/oggvorbis"/>
+        <filter-mask mask="801b5f00" typeref="system/nls"/>
+        <filter-mask mask="801b5f00" typeref="link/clienturlcache"/>
+        <filter-mask mask="801b5f00" typeref="system/personalusagedata"/>
+        <filter-mask mask="801b5f00" typeref="btrwbem"/>
+        <filter-mask mask="801b5f00" typeref="system/printjoboptions"/>
+        <filter-mask mask="801b5f00" typeref="officetemplate"/>
+        <filter-mask mask="801b5f00" typeref="officetemplatexmlzip"/>
+        
+        <!-- USER_FILE_CLASSIFICATION | USER_FILE_CREATE : 0x80000100 -->
+        <filter-mask mask="80000100" typeref="system/database"/>
+        <filter-mask mask="80000100" typeref="graphics/pnfbitmap"/>
+        <filter-mask mask="80000100" typeref="executable/command"/>
+        <filter-mask mask="80000100" typeref="executable/javabytecode"/>
+        <filter-mask mask="80000100" typeref="other/config"/>
+
+    </filter-masks>
+
+    <aspect-filter-masks>
+        <!-- 87DFFFFA - Everything but USER_CD_BURN | USER_NET_TRANSFER_UPLOAD | USER_PRINT_FILE -->
+        <aspect-filter mask="87DFFFFA" aspect-name="SYSTEM/Thread"/>
+        <!-- 87DFF3FA - Everything but USER_FILE_COPY | USER_FILE_MOVE | USER_CD_BURN | USER_NET_TRANSFER_UPLOAD | USER_PRINT_FILE-->
+        <aspect-filter mask="87DFF3FA" aspect-name="InternetBrowserTemporaryFiles">
+            <!-- 87DF73FA - Everything but USER_FILE_WRITE | USER_FILE_COPY | USER_FILE_MOVE | USER_CD_BURN | USER_NET_TRANSFER_UPLOAD | USER_PRINT_FILE -->
+            <aspect-filter-exclusion mask="87DF73FA" typeref="executable/" exclusion-mode="ExtentionOnly"/>
+            <aspect-filter-exclusion mask="87DF73FA" typeref="system/" exclusion-mode="ExtentionOnly"/>
+        </aspect-filter>
+        <!-- 7DFF3FA - Everything but USER_CD_BURN | USER_NET_TRANSFER_UPLOAD | USER_PRINT_FILE  | USER_FILE_CLASSIFICATION | USER_FILE_COPY | USER_FILE_MOVE-->
+        <aspect-filter mask="7DFF3FA" aspect-name="ApplicationTemporaryFiles"/>
+    </aspect-filter-masks>
+</root>
