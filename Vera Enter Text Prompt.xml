@@ -1,0 +1,56 @@
+
+<ArrayOfPrompt xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Prompt>
+        <Name>Vera Justification Text - Dev</Name>
+        <Description>requires users to enter a text</Description>
+        <Type>UserDecision</Type>
+        <DefaultLocaleID>en-US</DefaultLocaleID>
+        <Timeout>-1</Timeout>
+        <DisplayResponseText>true</DisplayResponseText>
+        <DisplayResponseText_NEW>JustificationText</DisplayResponseText_NEW>
+        <SurveyID>00000000-0000-0000-0000-000000000000</SurveyID>
+        <UseSecureDesktop>false</UseSecureDesktop>
+        <ResponseRequired>true</ResponseRequired>
+        <DefaultResponse>1</DefaultResponse>
+        <SkinID>4a997c65-23ed-4185-950b-ba436300a0f6</SkinID>
+        <SuperType>Base</SuperType>
+        <PasswordRequired>false</PasswordRequired>
+        <PasswordNumericCharRequired>false</PasswordNumericCharRequired>
+        <PasswordNumericCharRequired_NEW>0</PasswordNumericCharRequired_NEW>
+        <PasswordMixedCaseRequired>false</PasswordMixedCaseRequired>
+        <PasswordSpecialCharRequired>false</PasswordSpecialCharRequired>
+        <PasswordReadableAsTyped>false</PasswordReadableAsTyped>
+        <PasswordAllowAutoGenerate>false</PasswordAllowAutoGenerate>
+        <PasswordMinLength>0</PasswordMinLength>
+        <LocaleID>3ce78420-219b-4cb8-ba86-57a1e7e7a646</LocaleID>
+        <Locale>en-US</Locale>
+        <Message>Please ensure to enter a justification to send this email.
+&lt;br/&gt;
+</Message>
+        <Title>Cisco Data Security Alert</Title>
+        <OK>Continue</OK>
+        <Cancel>Close</Cancel>
+        <Button3 />
+        <Button2Used>true</Button2Used>
+        <Button3Used>false</Button3Used>
+        <Response>Justification</Response>
+        <PromptPasswordText />
+        <PasswordAutoGenText />
+        <PasswordValidError />
+        <ConfirmPwdLabel />
+        <ConfirmPwdError />
+        <PromptUserIdText />
+        <PromptDomainText />
+        <TimeoutActionType>None</TimeoutActionType>
+        <Button1ActionType>Alert</Button1ActionType>
+        <Button2ActionType>Block</Button2ActionType>
+        <Button3ActionType>None</Button3ActionType>
+        <EncryptionType>None</EncryptionType>
+        <AMEPwdDeliverMethod>NotSend</AMEPwdDeliverMethod>
+        <AMEPwdDeliverFormat>ClearImage</AMEPwdDeliverFormat>
+        <FallbackToAdaptiveIfNoPassword>false</FallbackToAdaptiveIfNoPassword>
+        <ApplyDgeExtension>false</ApplyDgeExtension>
+        <ContainerId>00000000-0000-0000-0000-000000000001</ContainerId>
+        <ReadOnly>false</ReadOnly>
+    </Prompt>
+</ArrayOfPrompt>
